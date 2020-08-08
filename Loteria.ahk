@@ -121,6 +121,7 @@ Return
 ExitApp
 
 ConcursoMenos:
+ClearColors()
 GuiControlGet, ContestSub,, Concurso
 GuiControl,1:, Concurso, % ContestSub - 1
 If IsObject(Results[ContestSub - 1]) {
@@ -134,6 +135,7 @@ Else {
 return
 
 ConcursoMais:
+ClearColors()
 GuiControlGet, ContestAdd,, Concurso
 GuiControl,, Concurso, % ContestAdd + 1
 If IsObject(Results[ContestAdd + 1]) {
@@ -147,6 +149,7 @@ Else {
 return
 
 Concurso:
+ClearColors()
 GuiControlGet, ContestEdit,, Concurso
 GuiControl,, Concurso, % ContestEdit
 If IsObject(Results[ContestEdit]) {
@@ -391,7 +394,9 @@ Class Ticket {
 
 ClearColors() {
 	Loop, 15 {
-		GuiControl, % "+cWhite", J%A_Index%
+		GuiControl, % "+cWhite", % "J" A_Index
+		GuiControlGet, CurrentNum,, % "J" A_Index
+		GuiControl,, % "J" A_Index, % CurrentNum 
 	}
 	GuiControl,,EditAcertos, % ""
 	GuiControl,,EditPremio, % ""
