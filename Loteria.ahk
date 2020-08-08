@@ -1,4 +1,4 @@
-#NoEnv
+﻿#NoEnv
 #MaxThreads 99000000
 #MaxThreadsPerHotkey 255
 #KeyHistory 0
@@ -25,6 +25,9 @@ URL := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p
 Results := {}
 Tickets := {}
 
+path := A_ScriptDir "\Yellow.cur"
+test := DllCall("LoadImageW", "Uint", 0, "Ptr", &path, "Uint", 0x2, "int", 0, "int", 0, "Uint", 0x10)
+
 max := 0
 Loop, Files, % A_ScriptDir "\resultados\*.json"
 {
@@ -43,20 +46,20 @@ Loop, 9 {
 	}
 }
 
-Gui, 1:New, +Resize -MaximizeBox +MinSize1000x600 +MaxSize1920x1080
+Gui, 1:New, +Resize -MaximizeBox +MinSize1000x600 +MaxSize1920x1080 +HwndMyGui
 Gui, 1:Font, cWhite
 Gui, 1:Color, 0x090909
-Gui, 1:Add, GroupBox, x0 y0 w600 h250
-Gui, 1:Add, GroupBox, x600 y0 w1320 h250
-Gui, 1:Add, GroupBox, x0 y250 w600 h830
-Gui, 1:Add, GroupBox, x600 y250 w1320 h950
+Gui, 1:Add, GroupBox, x0 y0 w600 h250  +HwndCursorFix
+Gui, 1:Add, GroupBox, x600 y0 w1320 h250  +HwndCursorFix
+Gui, 1:Add, GroupBox, x0 y250 w600 h830  +HwndCursorFix
+Gui, 1:Add, GroupBox, x600 y250 w1320 h950  +HwndCursorFix
 Gui, 1:Font, s80
 Gui, 1:Add, Text, center x1 y54 w270 h190 , Jogo
 Gui, 1:Font, s50
 Gui, 1:Add, Button, x312 y9 w50 h230 gJogoMenos , <
 Gui, 1:Add, Button, x512 y9 w50 h230 gJogoMais , >
 Gui, 1:Font, s110
-Gui, 1:Add, Edit, cBlack center x362 y59 w150 h180 vJogo gJogo, % (LastTicket) ? LastTicket : 1
+Gui, 1:Add, Edit, cBlack center x362 y59 w150 h180 vJogo gJogo +HwndCursorFix, % (LastTicket) ? LastTicket : 1
 Gui, 1:Font, s30
 Gui, 1:Add, Button, x361 y9 w152 h50 gEditar, Editar
 Gui, 1:Font, s10
@@ -64,12 +67,12 @@ Gui, 1:Font, s10
 
 Gui, 1:Font, s80
 Gui, 1:Add, Text, x622 y54 w490 h190 , Concurso
-Gui, 1:Add, Button, x1122 y9 w80 h230 gConcursoMenos, <
-Gui, 1:Add, Button, x1572 y9 w80 h230 gConcursoMais , >
+Gui, 1:Add, Button, x1122 y9 w80 h230 gConcursoMenos +HwndCursorFix, <
+Gui, 1:Add, Button, x1572 y9 w80 h230 gConcursoMais +HwndCursorFix , >
 Gui, 1:Font, s30
 Gui, 1:Add, Text, center x1202 y9 w370 h190, Número
 Gui, 1:Font, s110
-Gui, 1:Add, Edit, Number cBlack center x1202 y59 w370 h180 hwndHandle vConcurso gConcurso, % max
+Gui, 1:Add, Edit, Number cBlack center x1202 y59 w370 h180  +HwndCursorFix +hwndHandle vConcurso gConcurso, % max
 Gui, 1:Font, s40
 Gui, 1:Add, Button, x1672 y9 w240 h230 gBaixar vBaixar, Baixar
 ;final grupo 2
@@ -84,7 +87,7 @@ Loop, 3 {
 	}
 }
 
-Gui, 1:Add, Button, x12 y522 w575 h140 gConferir , Conferir
+Gui, 1:Add, Button, x12 y522 w575 h140 gConferir, Conferir
 Gui, 1:Font, s22 cFCE9E9
 Gui, 1:Add, Text, center x12 y679 w560 h190 , Premiação
 Gui, 1:Font, s45 cYellow
@@ -102,6 +105,11 @@ Gui, 1:Font, s20
 Gui, 1:Add, Text, x612 y750 w580 h280 vMoreInfo, % ""
 Gui, 1:Show, x0 y0 h1080 w1920 Maximize, LOTERIA FEDERAL - Lotofácil
 Results[max].Show()
+
+
+DllCall("SetClassLongPtrW", "Uint", CursorFix, "int", -12, "Ptr", test)
+DllCall("SetClassLongPtrW", "Uint", MyGui, "int", -12, "Ptr", test)
+DllCall("SetClassLongPtrW", "Uint", Handle, "int", -12, "Ptr", test)
 Return
 
 1:GuiClose:
