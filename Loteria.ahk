@@ -19,11 +19,16 @@ CoordMode, Pixel, Screen
 CoordMode, Mouse, Screen
 SetWorkingDir %A_ScriptDir%
 
-if !InStr(FileExist(A_ScriptDir "\resultados"), "D")
-	FileCreateDir % A_ScriptDir "\resultados"
+
 URL := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p/a1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLNDH0MPAzcDbz8vTxNDRy9_Y2NQ13CDA0sTIEKIoEKnN0dPUzMfQwMDEwsjAw8XZw8XMwtfQ0MPM2I02-AAzgaENIfrh-FqsQ9wBmoxN_FydLAGAgNTKEK8DkRrACPGwpyQyMMMj0VAcySpRM!/dl5/d5/L2dBISEvZ0FBIS9nQSEh/pw/Z7_61L0H0G0J0VSC0AC4GLFAD2003/res/id=buscaResultado/c=cacheLevelPage/=/?timestampAjax="
+Cursor := "https://github.com/gvieiraaa/Loto/blob/master/Yellow.cur?raw=true"
 Results := {}
 Tickets := {}
+
+if !InStr(FileExist(A_ScriptDir "\resultados"), "D")
+	FileCreateDir % A_ScriptDir "\resultados"
+if !InStr(FileExist(A_ScriptDir "\Yellow.cur"), "A")
+	UrlDownloadToFile, % Cursor, % "Yellow.cur"
 
 path := A_ScriptDir "\Yellow.cur"
 test := DllCall("LoadImageW", "Uint", 0, "Ptr", &path, "Uint", 0x2, "int", 0, "int", 0, "Uint", 0x10)
