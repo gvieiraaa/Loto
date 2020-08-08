@@ -30,8 +30,8 @@ if !InStr(FileExist(A_ScriptDir "\resultados"), "D")
 if !InStr(FileExist(A_ScriptDir "\Yellow.cur"), "A")
 	UrlDownloadToFile, % Cursor, % "Yellow.cur"
 
-path := A_ScriptDir "\Yellow.cur"
-test := DllCall("LoadImageW", "Uint", 0, "Ptr", &path, "Uint", 0x2, "int", 0, "int", 0, "Uint", 0x10)
+CursorPath := A_ScriptDir "\Yellow.cur"
+CUstomCursor := DllCall("LoadImageW", "Uint", 0, "Ptr", &CursorPath, "Uint", 0x2, "int", 0, "int", 0, "Uint", 0x10)
 
 max := 0
 Loop, Files, % A_ScriptDir "\resultados\*.json"
@@ -112,9 +112,9 @@ Gui, 1:Show, x0 y0 h1080 w1920 Maximize, LOTERIA FEDERAL - Lotofácil
 Results[max].Show()
 
 
-DllCall("SetClassLongPtrW", "Uint", CursorFix, "int", -12, "Ptr", test)
-DllCall("SetClassLongPtrW", "Uint", MyGui, "int", -12, "Ptr", test)
-DllCall("SetClassLongPtrW", "Uint", Handle, "int", -12, "Ptr", test)
+DllCall("SetClassLongPtrW", "Uint", CursorFix, "int", -12, "Ptr", CUstomCursor)
+DllCall("SetClassLongPtrW", "Uint", MyGui, "int", -12, "Ptr", CUstomCursor)
+DllCall("SetClassLongPtrW", "Uint", Handle, "int", -12, "Ptr", CUstomCursor)
 Return
 
 1:GuiClose:
