@@ -20,7 +20,9 @@ CoordMode, Mouse, Screen
 SetWorkingDir %A_ScriptDir%
 
 
-URL := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p/a1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLNDH0MPAzcDbz8vTxNDRy9_Y2NQ13CDA0sTIEKIoEKnN0dPUzMfQwMDEwsjAw8XZw8XMwtfQ0MPM2I02-AAzgaENIfrh-FqsQ9wBmoxN_FydLAGAgNTKEK8DkRrACPGwpyQyMMMj0VAcySpRM!/dl5/d5/L2dBISEvZ0FBIS9nQSEh/pw/Z7_61L0H0G0J0VSC0AC4GLFAD2003/res/id=buscaResultado/c=cacheLevelPage/=/?timestampAjax="
+;URL := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p/a1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLNDH0MPAzcDbz8vTxNDRy9_Y2NQ13CDA0sTIEKIoEKnN0dPUzMfQwMDEwsjAw8XZw8XMwtfQ0MPM2I02-AAzgaENIfrh-FqsQ9wBmoxN_FydLAGAgNTKEK8DkRrACPGwpyQyMMMj0VAcySpRM!/dl5/d5/L2dBISEvZ0FBIS9nQSEh/pw/Z7_61L0H0G0J0VSC0AC4GLFAD2003/res/id=buscaResultado/c=cacheLevelPage/=/?timestampAjax="
+;URL := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p/a1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLNDH0MPAzcDbz8vTxNDRy9_Y2NQ13CDA0sTIEKIoEKnN0dPUzMfQwMDEwsjAw8XZw8XMwtfQ0MPM2I02-AAzgaENIfrh-FqsQ9wBmoxN_FydLAGAgNTKEK8DkRrACPGwpyQyMMMj0VAcySpRM!/dl5/d5/L2dBISEvZ0FBIS9nQSEh/pw/Z7_61L0H0G0J0VSC0AC4GLFAD2003/res/id=buscaResultado/c=cacheLevelPage//timestampAjax="
+URL  := "http://loterias.caixa.gov.br/wps/portal/loterias/landing/lotofacil/!ut/p/a1/04_Sj9CPykssy0xPLMnMz0vMAfGjzOLNDH0MPAzcDbz8vTxNDRy9_Y2NQ13CDA0sTIEKIoEKnN0dPUzMfQwMDEwsjAw8XZw8XMwtfQ0MPM2I02-AAzgaENIfrh-FqsQ9wBmoxN_FydLAGAgNTKEK8DkRrACPGwpyQyMMMj0VAcySpRM!/dl5/d5/L2dBISEvZ0FBIS9nQSEh/pw/Z7_61L0H0G0J0VSC0AC4GLFAD2003/res/id=buscaResultado"
 Cursor := "https://github.com/gvieiraaa/Loto/blob/master/Yellow.cur?raw=true"
 Results := {}
 Tickets := {}
@@ -279,13 +281,14 @@ Class Result {
 		epoch := now * 1000
 		GetResult := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 		GetResult.SetTimeouts(0,3000,3000,3000)
-		GetResult.Open("GET", URL . epoch . "&concurso=" . ContestNumber, true)
+		;GetResult.Open("GET", URL . epoch . "?concurso=" . ContestNumber, true)
+		GetResult.Open("GET", URL . "?concurso=" . ContestNumber, true)
 		GetResult.Send("")
 		Try GetResult.WaitForResponse()
 		Sleep 100
 		Try Response := GetResult.ResponseText
 		
-		If (Response AND InStr(Response,"de_resultado"":null") = 0) {
+		If (Response AND InStr(Response,"erro"":true") = 0) {
 			this.json := (SubStr(Response,1,1) = "{") ? Response : ("{" Response "}")
 			this.Jsonify()
 			if this.Validate {
@@ -302,43 +305,47 @@ Class Result {
 	}
 	Jsonify() {
 		this.JsonObject := Jxon_Load(this.json)
-		this.RawResult := this.JsonObject.de_resultado
+		this.RawResult := this.JsonObject.listaDezenas
 	}
 	Validate {
 		Get {
-			return !!(this.JsonObject.de_resultado)
+			return !!(this.JsonObject.listaDezenas[1])
 		}
 	}
 	OrderedResult {
 		Get {
-			local temp := this.RawResult
-			Sort temp, D-
-			return StrReplace(temp,"-"," ")
+			for k, v in this.JsonObject.listaDezenas {
+			s.= SubStr(v,2,2) " "
+		}
+		return SubStr(s,1,-1)
+			;local temp := this.RawResult
+			;Sort temp, D-
+			;return StrReplace(temp,"-"," ")
 		}
 	}
 	Show() {
 		GuiControl,, ResultTxt, % "Resultado"
 		GuiControl,, ContestResults, % this.OrderedResult
 		
-		EvenMoreInfo := "`r`nData do sorteio:`t" this.JsonObject.dt_apuracaoStr
-		EvenMoreInfo .= (this.JsonObject.qt_ganhador_faixa1 = 1) ? "`r`n`r`nAcertaram 15:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa1,".") " Aposta. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa1,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa1,-1,2) " p/ cada)" : "`r`n`r`nAcertaram 15:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa1,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa1,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa1,-1,2) " p/ cada)"
-		EvenMoreInfo .= "`r`nAcertaram 14:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa2,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa2,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa2,-1,2) " p/ cada)"
-		EvenMoreInfo .= "`r`nAcertaram 13:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa3,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa3,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa3,-1,2) " p/ cada)"
-		EvenMoreInfo .= "`r`nAcertaram 12:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa4,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa4,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa4,-1,2) " p/ cada)"
-		EvenMoreInfo .= "`r`nAcertaram 11:`r`n`t" dotify(this.JsonObject.qt_ganhador_faixa5,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.vr_rateio_faixa5,1,-3),".") "," SubStr(this.JsonObject.vr_rateio_faixa5,-1,2) " p/ cada)" 
+		EvenMoreInfo := "`r`nData do sorteio:`t" this.JsonObject.dataApuracao
+		EvenMoreInfo .= (this.JsonObject.listaRateioPremio[1].numeroDeGanhadores = 1) ? "`r`n`r`nAcertaram 15:`r`n`t" dotify(this.JsonObject.listaRateioPremio[1].numeroDeGanhadores,".") " Aposta. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[1].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[1].valorPremio,-1,2) " p/ cada)" : "`r`n`r`nAcertaram 15:`r`n`t" dotify(this.JsonObject.listaRateioPremio[1].numeroDeGanhadores,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[1].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[1].valorPremio,-1,2) " p/ cada)"
+		EvenMoreInfo .= "`r`nAcertaram 14:`r`n`t" dotify(this.JsonObject.listaRateioPremio[2].numeroDeGanhadores,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[2].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[2].valorPremio,-1,2) " p/ cada)"
+		EvenMoreInfo .= "`r`nAcertaram 13:`r`n`t" dotify(this.JsonObject.listaRateioPremio[3].numeroDeGanhadores,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[3].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[3].valorPremio,-1,2) " p/ cada)"
+		EvenMoreInfo .= "`r`nAcertaram 12:`r`n`t" dotify(this.JsonObject.listaRateioPremio[4].numeroDeGanhadores,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[4].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[4].valorPremio,-1,2) " p/ cada)"
+		EvenMoreInfo .= "`r`nAcertaram 11:`r`n`t" dotify(this.JsonObject.listaRateioPremio[5].numeroDeGanhadores,".") " Apostas. (R$ " dotify(SubStr(this.JsonObject.listaRateioPremio[5].valorPremio,1,-3),".") "," SubStr(this.JsonObject.listaRateioPremio[5].valorPremio,-1,2) " p/ cada)" 
 		
 		GuiControl,, EvenMoreInfo, % EvenMoreInfo
 		
-		MoreInfo := "Valor Acumulado:`tR$ " this.JsonObject.vrAcumuladoFaixa1
-		MoreInfo .= "`r`n`r`nEstimativa p/ próximo:`tR$ " this.JsonObject.vrEstimativa
-		MoreInfo .= "`r`n`r`nValor arrecadado total:`tR$ " this.JsonObject.vrArrecadado
-		MoreInfo .= "`r`n`r`nAcumulado (Especial):`tR$ " this.JsonObject.vrAcumuladoEspecial
+		MoreInfo := "Valor Acumulado:`tR$ " this.JsonObject.valorAcumuladoProximoConcurso
+		MoreInfo .= "`r`n`r`nEstimativa p/ próximo:`tR$ " this.JsonObject.valorEstimadoProximoConcurso
+		MoreInfo .= "`r`n`r`nValor arrecadado total:`tR$ " this.JsonObject.valorArrecadado
+		MoreInfo .= "`r`n`r`nAcumulado (Especial):`tR$ " this.JsonObject.valorAcumuladoConcursoEspecial
 		
 		GuiControl,, MoreInfo, % MoreInfo
 		GuiControl, Disable, Baixar
 	}
 	Prize(qtd) {
-		return % (qtd=15) ? this.JsonObject.vr_rateio_faixa1 : (qtd=14) ? this.JsonObject.vr_rateio_faixa2 : (qtd=13) ? this.JsonObject.vr_rateio_faixa3 : (qtd=12) ? this.JsonObject.vr_rateio_faixa4 : this.JsonObject.vr_rateio_faixa5
+		return % (qtd=15) ? this.JsonObject.listaRateioPremio[1].valorPremio : (qtd=14) ? this.JsonObject.listaRateioPremio[2].valorPremio : (qtd=13) ? this.JsonObject.listaRateioPremio[3].valorPremio : (qtd=12) ? this.JsonObject.listaRateioPremio[4].valorPremio : this.JsonObject.listaRateioPremio[5].valorPremio
 	}
 	__Delete() {
 		this.base := ""
